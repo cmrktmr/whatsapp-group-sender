@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Mesaj Gönderici</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body class="bg-light">
+    <div id="loading" style="display: none;">
+        <h2>...Mesajlar Gönderiliyor Lütfen BEKLEYİNİZ...</h2>
+    </div>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                <% if (isReady) { %>
+                    Durum: Bağlı
+                    <% } else { %>
+                        <img id="qrCode" src="<%= qrCodeData %>" alt="QR Kod">
+                        <% } %>
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">AFS Nakliyat Whatsapp Yönetim</div>
+                                <div class="card-body">
+                                    <form action="/send" method="post">
+                                        <div class="row">
+                                            <!-- Gruplar Bölümü -->
+
+                                            <div class="col-md-6">
+                                                <p>Seçilen grup sayısı: <span id="selectedCount">0</span></p>
+
+                                                <% groups.forEach(group=> { %>
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="groups"
+                                                            value="<%= group.id._serialized %>"
+                                                            id="group-<%= group.id._serialized %>">
+                                                        <label class="form-check-label"
+                                                            for="group-<%= group.id._serialized %>">
+                                                            <%= group.name %>
+                                                        </label>
+                                                    </div>
+                                                    <% }); %>
+                                            </div>
+
+                                            <!-- Mesaj Yazma Bölümü -->
+                                            <div class="col-md-6">
+                                                <emoji-picker></emoji-picker>
+                                                <textarea class="form-control mt-2" name="message"
+                                                    placeholder="Mesajınızı buraya yazın" rows="4"
+                                                    style="width: 100%; height: 500px;"></textarea>
+                                                <div class="mt-3 text-center">
+                                                    <input type="submit" value="Mesajı Gönder" class="btn btn-primary">
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                    </form>
+                                </div>
+                            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emoji Picker JS -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element"></script>
+    <!-- <script>
+        const isReady = "<%= isReady %>" === 'true' ? true : false;
+        let qrReady = setInterval(function () {
+            if (!isReady) {
+                location.reload();
+            }
+        }, 50000);
+    </script>-->
+    <script>
+        const isAuthenticated2 = "<%= isAuthenticated %>" === 'true' ? true : false;
+        console.log(isAuthenticated2, "isAuthenticated2")
+        if (!isAuthenticated2) {
+            localStorage.removeItem('hasReloaded');
+            location.reload();
+        }
+    </script>
+
+
+    <script>
+        const picker = document.querySelector('emoji-picker');
+        const textarea = document.querySelector('textarea');
+
+        picker.addEventListener('emoji-click', event => {
+            textarea.value += event.detail.unicode;
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][name="groups"]');
+            const selectedCountSpan = document.getElementById('selectedCount');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const selected = document.querySelectorAll('input[type="checkbox"][name="groups"]:checked').length;
+                    selectedCountSpan.textContent = selected;
+                });
+            });
+        });
+
+
+    </script>
+    <script>
+        let hasReloaded = localStorage.getItem('hasReloaded') === 'true' ? true : false;
+
+        let groupsCheckInterval = setInterval(function () {
+            fetch('/groups-status')
+                .then(response => response.json())
+                .then(data => {
+                    const qrImage = document.getElementById('qrCode');
+                    const card = document.querySelector('.card');
+                    console.log(hasReloaded, "hasReloaded")
+                    if (data.hasGroups && !hasReloaded) {
+                        qrImage.style.display = 'none';
+                        clearInterval(groupsCheckInterval);  // Sorgulamayı durdur
+
+                        // Kullanıcıya sadece bir kez mesaj göster
+                        if (confirm('Gruplarınız hazır. Mesaj göndermeye başlayabilirsiniz.')) {
+                            hasReloaded = true;  // Sayfanın yeniden yüklendiğini belirt
+                            localStorage.setItem('hasReloaded', 'true'); // Sayfanın yeniden yüklendiğini localStorage'a kaydedin
+                            location.reload();  // Sayfayı yeniden yükle
+                        }
+                    }
+                });
+        }, 50000);
+
+    </script>
+
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function () {
+            document.getElementById('loading').style.display = 'block';
+        });
+    </script>
+    <style>
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+        }
+
+        #loading h2 {
+            position: absolute;
+            top: 50%;
+        }
+
+        img#qrCode {
+            display: block;
+            width: 200px;
+            height: 200px;
+        }
+
+        #qrContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+    </style>
+
+</body>
+
+</html>

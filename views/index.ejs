@@ -30,7 +30,8 @@
 
                                             <div class="col-md-6">
                                                 <p>Seçilen grup sayısı: <span id="selectedCount">0</span></p>
-
+                                                <button type="button" id="selectAllBtn" class="btn btn-primary">Tümünü
+                                                    Seç</button>
                                                 <% groups.forEach(group=> { %>
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" name="groups"
@@ -95,12 +96,20 @@
         document.addEventListener("DOMContentLoaded", function () {
             const checkboxes = document.querySelectorAll('input[type="checkbox"][name="groups"]');
             const selectedCountSpan = document.getElementById('selectedCount');
+            const selectAllBtn = document.getElementById('selectAllBtn');
 
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', () => {
                     const selected = document.querySelectorAll('input[type="checkbox"][name="groups"]:checked').length;
                     selectedCountSpan.textContent = selected;
                 });
+            });
+
+            selectAllBtn.addEventListener('click', () => {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+                selectedCountSpan.textContent = checkboxes.length;
             });
         });
 

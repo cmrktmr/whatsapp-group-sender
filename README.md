@@ -1,2 +1,2 @@
-# whatsapp Group Message Sender
+# Whatsapp Group Message Sender
 

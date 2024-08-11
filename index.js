@@ -62,7 +62,7 @@ app.get('/get-qr', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-    res.render('index', { groups, isReady, qrCodeData, isAuthenticated, sessionExpirationTime });
+    res.render('index', { groups, isReady, qrCodeData, isAuthenticated, sessionExpirationTime, messageCounts });
 });
 
 app.get('/sync-groups', async (req, res) => {
@@ -83,6 +83,7 @@ app.get('/sync-groups', async (req, res) => {
 const sendMessageToGroup = async (groupChat, message) => {
     await groupChat.sendMessage(message);
 };
+let messageCounts = {}; // Grup mesaj sayıları için nesne
 
 app.post('/send', async (req, res) => {
     let selectedGroups = req.body.groups || [];
@@ -97,6 +98,14 @@ app.post('/send', async (req, res) => {
         const groupChat = groups.find(g => g.id._serialized === groupID);
         if (groupChat) {
             promises.push(sendMessageToGroup(groupChat, message));
+
+            // Mesaj sayısını artır
+            if (messageCounts[groupID]) {
+                messageCounts[groupID]++;
+            } else {
+                messageCounts[groupID] = 1;
+            }
+
             if (promises.length >= 5) { // Aynı anda 5 grup işleyin
                 await Promise.all(promises);
                 promises.length = 0; // Dizi sıfırla
@@ -109,12 +118,20 @@ app.post('/send', async (req, res) => {
         await Promise.all(promises); // Kalan grupları işleyin
     }
 
+    if (global.gc) {
+        global.gc();
+        console.warn('Garbage collection clear');
+    } else {
+        console.warn('Garbage collection is not exposed');
+    }
+
     const htmlResponse = `
         <h2>Mesajlar gönderildi!</h2>
         <a href="/" class="btn btn-primary">TEKRAR MESAJ GÖNDER</a>
     `;
     res.send(htmlResponse);
 });
+
 app.get('/logout', (req, res) => {
     isAuthenticated = false;
     sessionExpirationTime = null;

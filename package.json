@@ -1,13 +1,10 @@
 {
-  "name": "afs-nakliyat-whatsapp",
+  "name": "whatsappapp",
   "version": "1.0.0",
-  "description": "AFS Nakliyat WhatsApp Yönetim Uygulaması",
-  "main": "main.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
@@ -19,26 +16,5 @@
     "qrcode": "^1.5.3",
     "qrcode-terminal": "^0.12.0",
     "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#webpack-exodus"
-  },
-  "devDependencies": {
-    "electron": "^latest",
-    "electron-builder": "^latest"
-  },
-  "build": {
-    "appId": "com.afsnakliyat.whatsapp",
-    "productName": "AFS Nakliyat WhatsApp Yönetim",
-    "mac": {
-      "category": "public.app-category.business"
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage"
-      ]
-    }
   }
 }

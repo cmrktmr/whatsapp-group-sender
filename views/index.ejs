@@ -29,9 +29,15 @@
                                             <!-- Gruplar Bölümü -->
 
                                             <div class="col-md-6">
+
                                                 <p>Seçilen grup sayısı: <span id="selectedCount">0</span></p>
                                                 <button type="button" id="selectAllBtn" class="btn btn-primary">Tümünü
                                                     Seç</button>
+
+                                                <button id="syncButton" class="btn btn-primary">Grupları Senkronize
+                                                    Et</button>
+
+
                                                 <% groups.forEach(group=> { %>
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" name="groups"
@@ -139,8 +145,41 @@
                 });
         }, 50000);
 
-    </script>
 
+
+        document.getElementById('syncButton').addEventListener('click', function () {
+            fetch('/sync-groups')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Yeni grupları güncellemek için sayfayı yeniden yükleyin
+                        location.reload();
+                    } else {
+                        alert('Grupları senkronize edemedik: ' + data.message);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+
+    </script>
+    <script>
+        const sessionExpirationTime = "<%= sessionExpirationTime %>";
+        console.log(sessionExpirationTime, "sessionExpirationTime")
+        if (sessionExpirationTime) {
+            const checkSession = () => {
+                const timeLeft = sessionExpirationTime - Date.now();
+                if (timeLeft <= 0) {
+                    alert('Oturum süreniz doldu, lütfen yeniden QR kodunu taratın.');
+                    window.location.href = '/logout';
+                } else {
+                    setTimeout(checkSession, 60000); // Her dakika kontrol edin
+                }
+            };
+
+            checkSession();
+        }
+    </script>
 
     <script>
         document.querySelector('form').addEventListener('submit', function () {
